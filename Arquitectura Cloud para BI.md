@@ -1,0 +1,139 @@
+# Computación en la Nube — Arquitectura Cloud para BI
+**Alumno:** Edgar Eduardo Lopez  
+**Materia:** Computación en la Nube (361)  
+**Proyecto:** Práctica Integradora — DENUE INEGI
+
+---
+
+## Diagrama de Arquitectura
+
+<img width="1693" height="929" alt="Diagrama de Arquitectura" src="https://github.com/user-attachments/assets/a65b092f-42a9-4201-9c21-fbaa1b82ee21" />
+
+
+---
+
+## URLs de la API (Entregable 2)
+
+Todos los endpoints están desplegados en PythonAnywhere y responden datos en formato JSON:
+
+| Endpoint | Descripción | Link |
+|---|---|---|
+| `/api/unidades` | Catálogo general (100 registros) | [Abrir](https://edgareduardo.pythonanywhere.com/api/unidades) |
+| `/api/unidades/963` | Consulta por ID | [Abrir](https://edgareduardo.pythonanywhere.com/api/unidades/963) |
+| `/api/unidades/buscar?nombre=granja` | Búsqueda por nombre | [Abrir](https://edgareduardo.pythonanywhere.com/api/unidades/buscar?nombre=granja) |
+| `/api/estadisticas/total_por_estado` | KPI por estado | [Abrir](https://edgareduardo.pythonanywhere.com/api/estadisticas/total_por_estado) |
+| `/api/unidades/filtro?estado=baja` | Filtro por estado | [Abrir](https://edgareduardo.pythonanywhere.com/api/unidades/filtro?estado=baja) |
+| `/api/unidades/963/perfil_completo` | Perfil completo con JOINs | [Abrir](https://edgareduardo.pythonanywhere.com/api/unidades/963/perfil_completo) |
+| `/api/unidades/cercanas?lat=21.8&lon=-102.3&radio=50` | Búsqueda geoespacial | [Abrir](https://edgareduardo.pythonanywhere.com/api/unidades/cercanas?lat=21.8&lon=-102.3&radio=50) |
+
+---
+
+## Descripción del proyecto
+
+Migración del directorio de unidades económicas del INEGI (DENUE) a una arquitectura en la nube, expuesta mediante una API RESTful y visualizada en Power BI.
+
+```
+Excel INEGI → Supabase (PostgreSQL) → Flask API (PythonAnywhere) → Power BI
+```
+
+---
+
+## Tecnologías utilizadas
+
+| Componente | Tecnología |
+|---|---|
+| Base de datos | Supabase (PostgreSQL) |
+| Backend / API | Python + Flask |
+| Hosting | PythonAnywhere |
+| Visualización | Power BI Desktop |
+| Validación API | Postman |
+
+---
+
+## Paso 1 — Migración a Supabase
+
+Se creó un proyecto en [supabase.com](https://supabase.com) llamado `denue-proyecto`.
+
+### Tablas creadas
+
+| Tabla | Registros |
+|---|---|
+| `establecimientos` | 678 |
+| `cat_entidades` | 2 |
+| `cat_actividades` | 10 |
+| `cat_municipios` | 12 |
+| `cat_localidades` | 50 |
+| `cat_personal_ocupado` | 7 |
+
+### Ejecutar migración
+
+```bash
+pip install pandas sqlalchemy psycopg2-binary openpyxl
+python migrar_supabase.py
+```
+
+---
+
+## Paso 2 — API RESTful con Flask
+
+El archivo `flask_app.py` contiene 7 endpoints documentados.
+
+```bash
+pip install flask requests
+python flask_app.py
+```
+
+---
+
+## Paso 3 — Despliegue en PythonAnywhere
+
+1. Crear cuenta en [pythonanywhere.com](https://www.pythonanywhere.com)
+2. Subir `flask_app.py` en Files
+3. Instalar dependencias en la consola Bash:
+```bash
+mkvirtualenv venv --python=python3.12
+pip install flask requests
+```
+4. Configurar WSGI:
+```python
+import sys
+sys.path.insert(0, '/home/EdgarEduardo')
+activate_this = '/home/EdgarEduardo/.virtualenvs/venv/bin/activate_this.py'
+with open(activate_this) as f:
+    exec(f.read(), {'__file__': activate_this})
+from flask_app import app as application
+```
+5. Recargar la web app
+
+---
+
+## Paso 4 — Dashboard en Power BI
+
+Se conectó Power BI Desktop a la API usando **Obtener datos → Web**.
+
+### Visualizaciones
+- Tarjeta KPI: total de unidades económicas
+- Gráfico de barras: unidades por estado
+- Gráfico circular: distribución porcentual por estado
+- Segmentador: filtro interactivo por estado
+
+---
+
+## Estructura del repositorio
+
+```
+├── migrar_supabase.py        # Script migración Excel → Supabase
+├── flask_app.py              # API RESTful con Flask
+├── dashboard_denue.pbix      # Dashboard Power BI
+├── diagrama_arquitectura.png # Diagrama de arquitectura
+├── insights.docx             # Hallazgos de negocio (2 páginas)
+└── README.md                 # Este archivo
+```
+
+---
+
+## Notas
+
+- Las coordenadas geográficas son ficticias generadas dentro de rangos reales de Aguascalientes y Baja California, ya que el Excel original no incluía coordenadas.
+- La API usa la REST API de Supabase vía HTTPS en lugar de conexión directa PostgreSQL, debido a restricciones del plan gratuito de PythonAnywhere.
+- Se utilizó IA (Claude) como herramienta de revisión de errores de sintaxis y depuración de código. Todo el desarrollo, lógica y estructura fue diseñado e implementado por el alumno.
